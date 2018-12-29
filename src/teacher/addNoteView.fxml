@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.FlowPane?>
+
+<FlowPane alignment="CENTER" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" vgap="10.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="teacher.addNoteController">
+   <children>
+      <HBox alignment="CENTER_LEFT" prefHeight="44.0" prefWidth="284.0" spacing="10.0">
+         <children>
+            <Label text="Student ID:" />
+            <TextField fx:id="tfStudentID" prefHeight="31.0" prefWidth="193.0" />
+         </children>
+      </HBox>
+      <Label text="Note:" />
+      <TextArea fx:id="taNote" prefHeight="200.0" prefWidth="200.0" />
+      <HBox alignment="CENTER_RIGHT" prefHeight="39.0" prefWidth="284.0" spacing="10.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#onSaveNote" text="Save" />
+            <Button mnemonicParsing="false" onAction="#onCancelNote" text="Cancel" />
+         </children>
+      </HBox>
+   </children>
+</FlowPane>
