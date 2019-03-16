@@ -1,29 +1,29 @@
 # School-Management
 Primary school management system to help administrators with managing their schools and to match teachers with students and parents. 
-### Database:
+## Database:
 
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/database/primary_school.PNG" width="800" height="600">
 
-### Login View:
+## Login View:
 
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/screenshots/login.PNG" width="450" height="500">
 
-### Admin Views:
+## Admin Views:
 
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/screenshots/admin1.PNG" width="800" height="600">
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/screenshots/admin2.PNG" width="800" height="600">
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/screenshots/admin3.PNG" width="800" height="600">
 
-### Teacher Views:
+## Teacher Views:
 
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/screenshots/teacher1.PNG" width="800" height="600">
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/screenshots/teacher2.PNG" width="800" height="600">
 
-### Student View:
+## Student View:
 
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/screenshots/student.PNG" width="800" height="600">
 
-### Parent Views:
+## Parent Views:
 
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/screenshots/parent1.PNG" width="800" height="600">
 - <img src="https://github.com/alimhmdghanem/School-Management/blob/master/screenshots/parent2.PNG" width="800" height="600">
