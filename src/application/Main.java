@@ -57,7 +57,7 @@ public class Main extends Application {
 
 	// JDBC driver name and database URL
 	private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-	private static final String DB_URL = "jdbc:mysql://localhost/primary1?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+	private static final String DB_URL = "jdbc:mysql://localhost/primary_school?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
 	// Database credentials
 	private static final String USER = "ali";

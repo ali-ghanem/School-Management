@@ -97,15 +97,15 @@ public class parentController {
 			children_ids = new HashMap<>();
 			children_classes = new HashMap<>();
 			String selectChildren = String.format(
-					"select students.student_name, students.student_id, concat(students.class_grade, students.classroom) as class"
-							+ " from (students inner join parents using (parent_id)) where parents.parent_id=%s",
+					"select student_name, student_id, concat(class_grade, class_room) as class"
+							+ " from (students inner join parents using (parent_id)) inner join classes using (class_id) where parents.parent_id=%s",
 					ID);
 			resultChildren = statement.executeQuery(selectChildren);
 			String childName, childID, childClass;
 			while (resultChildren.next()) {
-				childName = resultChildren.getString(1);
-				childID = resultChildren.getString(2);
-				childClass = resultChildren.getString(3);
+				childName = resultChildren.getString("student_name");
+				childID = resultChildren.getString("student_id");
+				childClass = resultChildren.getString("class");
 				children_ids.put(childName, childID);
 				children_classes.put(childName, childClass);
 				listChildren.add(childName);
@@ -119,10 +119,8 @@ public class parentController {
 	public void loadCourses() {
 		try {
 			String selectClasses = String.format(
-					"select courses.course_name, teachers.teacher_name, teachers.teacher_id, grade.quiz, grade.midterm, grade.final "
-							+ "from (((grade inner join students using (student_id)) inner join courses using (course_id)) "
-							+ "inner join teaches using (course_id, classroom)) inner join teachers using (teacher_id)"
-							+ "where students.student_id = %s;",
+					"select course_name, teacher_name, teacher_id, quiz, midterm, final from (((grade inner join students using (student_id)) inner join courses using (course_id)) inner join teaches using (class_id, course_id)) left join teachers using (teacher_id)"
+							+ "where student_id = %s;",
 					CHILD_ID);
 			resultCourses = statement.executeQuery(selectClasses);
 
@@ -149,7 +147,7 @@ public class parentController {
 			Recommendation rec;
 			String child_name, teacherName, notes, note_date;
 			listNotes.clear();
-			String selectNotes = String.format("select student_name, teacher_name, note_content, note_date\r\n"
+			String selectNotes = String.format("select student_name, teacher_name, note_content, note_date "
 					+ "from (((notes inner join students using (student_id)) inner join teachers using (teacher_id)) inner join parents using (parent_id))\r\n"
 					+ "where parent_id =%s;", ID);
 			resultNotes = statement.executeQuery(selectNotes);

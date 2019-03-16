@@ -58,8 +58,8 @@ public class teacherController {
 	private static Stage primaryStage;
 	private static Statement statement;
 	private ResultSet resultNotes, resultGrades, resultClasses;
-	private String courseID, classGrade;
-	private HashMap<String, String> courses_ids;
+	private String courseID, classGrade, class_id;
+	private HashMap<String, String> courses_ids, class_ids;
 	private Stage noteWindow;
 
 	public static void setPrimaryStage(Stage stage) {
@@ -141,15 +141,18 @@ public class teacherController {
 	public void loadCourses() {
 		try {
 			String selectClasses = String.format(
-					"select concat(courses.course_name, ', ', courses.class_grade, teaches.classroom) as course_class, "
-							+ " courses.course_id " + "from (teaches inner join courses using (course_id)) "
+					"select concat (course_name, ', ', class_grade, class_room) as course_class, course_id, class_id from ((teaches inner join courses using (course_id)) inner join classes using (class_id, class_grade)) "
 							+ " where teacher_id = %s;",
 					ID);
 			courses_ids = new HashMap<>();
+			class_ids = new HashMap<>();
 			resultClasses = statement.executeQuery(selectClasses);
 			while (resultClasses.next()) {
 				listCourses.add(resultClasses.getString("course_class"));
+				System.out.println(resultClasses.getString("course_class")+", "+resultClasses.getString("course_id"));
 				courses_ids.put(resultClasses.getString("course_class"), resultClasses.getString("course_id"));
+				class_ids.put(resultClasses.getString("course_class"), resultClasses.getString("class_id"));
+				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -284,15 +287,15 @@ public class teacherController {
 		try {
 			String selectedValue = coursesList.getValue();
 			courseID = courses_ids.get(selectedValue);
-			String classroom = "" + selectedValue.split(",")[1].charAt(2);
+			class_id = class_ids.get(selectedValue);
+			System.out.println(courseID);
 
 			Grade grade = null;
 			String id, name, quiz, mid, fin;
 			String selectGrades = String.format(
-					"select students.student_id, students.student_name, quiz, midterm ,final "
-							+ "from (grade inner join students using (student_id)) inner join teaches using (course_id, classroom)"
-							+ "where teaches.teacher_id = %s and grade.course_id = %s and teaches.classroom='%s';",
-					ID, courseID, classroom);
+					" select student_id, student_name, quiz, midterm, final from ((grade inner join students using (student_id)) inner join teaches using (course_id, class_id)) "
+							+ "where teacher_id = %s and course_id = %s and class_id=%s;",
+					ID, courseID, class_id);
 			resultGrades = statement.executeQuery(selectGrades);
 
 			listGrades.clear();

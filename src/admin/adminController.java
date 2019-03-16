@@ -155,15 +155,15 @@ public class adminController {
 		try {
 			Student std;
 			String student_id, student_name, class_grade, classroom, parent_id, parent_name, contact;
-			String selectStudents = "select students.student_id, students.student_name, students.class_grade, "
-					+ "students.classroom, students.parent_id, parents.parent_name, parents.parent_contact from students "
-					+ "inner join parents using (parent_id);";
+			String selectStudents = "select student_id, student_name, class_grade, "
+					+ "class_room, parent_id, parent_name, parent_contact from ((students "
+					+ "inner join parents using (parent_id)) inner join classes using (class_id));";
 			resultStudents = statement.executeQuery(selectStudents);
 			while (resultStudents.next()) {
 				student_id = resultStudents.getString("student_id");
 				student_name = resultStudents.getString("student_name");
 				class_grade = resultStudents.getString("class_grade");
-				classroom = resultStudents.getString("classroom");
+				classroom = resultStudents.getString("class_room");
 				parent_id = resultStudents.getString("parent_id");
 				parent_name = resultStudents.getString("parent_name");
 				contact = resultStudents.getString("parent_contact");
@@ -201,9 +201,12 @@ public class adminController {
 			String classroom = classroomsList.getValue();
 			Course crs;
 			String course_id, course_name, instructor_name, instructor_id;
+			// select course_name, class_grade, class_room, teacher_id, teacher_name from
+			// ((courses inner join classes using (class_grade)) inner join teaches using
+			// (course_id, class_id)) inner join teachers using (teacher_id);
 			String selectCourses = String.format(
-					"select courses.course_id, courses.course_name, teachers.teacher_name, teachers.teacher_id from (courses left join teaches using (course_id)) left join teachers using (teacher_id) "
-							+ "where class_grade=%s and classroom='%s';",
+					"select course_name, course_id, class_grade, class_room, teacher_name, teacher_id from ((courses inner join classes using (class_grade)) left join teaches using (course_id, class_id)) left join teachers using (teacher_id) "
+							+ "where class_grade=%s and class_room='%s';",
 					class_grade, classroom);
 			ResultSet result = statement.executeQuery(selectCourses);
 			while (result.next()) {
@@ -358,9 +361,29 @@ public class adminController {
 
 	public void insert_student_courses(Student std) throws SQLException {
 		String student_id = std.getStudent_id();
+		// insert into grade (student_id, course_id) select student_id, course_id from
+		// (students inner join classes using (class_id)) inner join courses using
+		// (class_grade) where st
 		String insertGrade = String.format("insert into grade (student_id, course_id) select student_id, course_id "
-				+ "from students inner join courses using (class_grade) where student_id=%s;", student_id);
+				+ "from (students inner join classes using (class_id)) inner join courses using (class_grade) where student_id=%s;",
+				student_id);
 		statement.executeUpdate(insertGrade);
+	}
+
+	public String getClassId(String class_grade, String class_room) {
+		String getId = String.format("select class_id from classes where class_grade=%s and class_room='%s';",
+				class_grade, class_room);
+		ResultSet set;
+		String class_id = null;
+		try {
+			set = statement.executeQuery(getId);
+			set.next();
+			class_id = set.getString("class_id");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return class_id;
 	}
 
 	public void insert_student_with_parent(String student_name, String student_password, String class_grade,
@@ -377,10 +400,10 @@ public class adminController {
 			res.next();
 			String parent_id = res.getString(1);
 			// insert student
-			String insertStudent = String.format(
-					"insert into students (student_name, student_password, class_grade, classroom, parent_id) "
-							+ "values ('%s', '%s', '%s', '%s', '%s')",
-					student_name, student_password, class_grade, classroom, parent_id);
+			String class_id = getClassId(class_grade, classroom);
+			String insertStudent = String
+					.format("insert into students (student_name, student_password, class_id, parent_id) "
+							+ "values ('%s', '%s', '%s', '%s')", student_name, student_password, class_id, parent_id);
 			statement.executeUpdate(insertStudent);
 			// get student id
 			String getStudentID = "select max(student_id) from students;";
@@ -402,10 +425,11 @@ public class adminController {
 			String parent_id) {
 		try {
 			// insert student
-			String insertStudent = String.format(
-					"insert into students (student_name, student_password, class_grade, classroom, parent_id) "
-							+ "values ('%s', '%s', '%s', '%s', '%s')",
-					student_name, student_password, class_grade, classroom, parent_id);
+			String class_id = getClassId(class_grade, classroom);
+
+			String insertStudent = String
+					.format("insert into students (student_name, student_password, class_id, parent_id) "
+							+ "values ('%s', '%s', '%s', '%s')", student_name, student_password, class_id, parent_id);
 			statement.executeUpdate(insertStudent);
 			// get student id
 			String getStudentID = "select max(student_id) from students;";
@@ -586,6 +610,8 @@ public class adminController {
 			String new_instructor_id = edittedCell.getNewValue();
 			String new_instructor_name = null;
 			crs.setInstructor_id(new_instructor_id);
+
+			// get the new instructor name
 			String get_instructor_name = String.format("select teacher_name from teachers where teacher_id=%s;",
 					new_instructor_id);
 			ResultSet result = statement.executeQuery(get_instructor_name);
@@ -593,9 +619,17 @@ public class adminController {
 				new_instructor_name = result.getString("teacher_name");
 			crs.setInstructor_name(new_instructor_name);
 
+			// get the class id
+			String class_grade = classgradesList.getValue();
+			String getClsID = String.format("select class_id from classes where class_grade=%s and class_room='%s';",
+					class_grade, classroom);
+			ResultSet res = statement.executeQuery(getClsID);
+			res.next();
+			String class_id = res.getString("class_id");
+
 			String update_instructor = String.format(
-					"update teaches set teacher_id=%s where course_id=%s and classroom='%s';", new_instructor_id,
-					course_id, classroom);
+					"update teaches set teacher_id=%s where course_id=%s and class_id=%s;", new_instructor_id,
+					course_id, class_id);
 			statement.executeUpdate(update_instructor);
 
 			coursesTable.refresh();
@@ -613,10 +647,13 @@ public class adminController {
 		String course_id = null;
 		if (result.next())
 			course_id = result.getString(1);
-		String insert_into_teaches = String.format("insert into teaches values (%s, 'A', null);", course_id);
-		statement.executeUpdate(insert_into_teaches);
-		insert_into_teaches = String.format("insert into teaches values (%s, 'B', null);", course_id);
-		statement.executeUpdate(insert_into_teaches);
+
+		// insert to 'teaches' table
+		String insertToTeaches = String.format(
+				"insert into teaches (course_id, class_id) select %s, class_id from classes where class_grade=%s;",
+				course_id, class_grade);
+		statement.executeUpdate(insertToTeaches);
+
 		Course crs = new Course(course_id, courseName, class_grade);
 		coursesList.add(crs);
 		addCourseWindow.close();

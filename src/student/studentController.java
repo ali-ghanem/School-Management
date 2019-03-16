@@ -56,11 +56,11 @@ public class studentController {
 
 	public void getClassGrade() {
 		try {
-			String getClassGrade = String.format("select concat(students.class_grade, students.classroom) as class"
-					+ " from students where students.student_id = %s;", ID);
+			String getClassGrade = String.format("select concat(class_grade, class_room) as class"
+					+ " from students inner join classes using (class_id) where students.student_id = %s;", ID);
 			resultClass = statement.executeQuery(getClassGrade);
 			resultClass.next();
-			ClassGrade = resultClass.getString(1);
+			ClassGrade = resultClass.getString("class");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -84,7 +84,7 @@ public class studentController {
 	public void loadCourses() {
 		try {
 			String selectClasses = String.format(
-					"select courses.course_name, teachers.teacher_name, teachers.teacher_id, grade.quiz, grade.midterm, grade.final from (((grade inner join students using (student_id)) inner join courses using (course_id)) left join teaches using (course_id, classroom)) left join teachers using (teacher_id) where students.student_id = %s;",
+					"select course_name, teacher_name, teacher_id, quiz, midterm, final from (((grade inner join students using (student_id)) inner join courses using (course_id)) inner join teaches using (class_id, course_id)) left join teachers using (teacher_id) where students.student_id = %s;",
 					ID);
 			resultCourses = statement.executeQuery(selectClasses);
 
